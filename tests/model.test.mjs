@@ -29,3 +29,23 @@ test('schema rejects missing/unknown fields, NaN, strings, illegal proportions',
 test('money conservation audit and equity identity at normal scales',()=>{for(const r of simulate(cloneDemo()).monthly){near(r[36]-r[37],r[38]);assert.ok(Math.abs(r[51])<1e-6);assert.ok(Math.abs(r[52])<1e-6);}});
 test('sensitivity scenarios recalculate and ignore overrides',()=>{const x=cloneDemo();x.overrides[0]=-.8;const s=sensitivity(x);assert.equal(s.length,5);assert.equal(s[0].result.monthly[0][8],0);assert.equal(x.overrides[0],-.8);});
 test('extreme monthly overrides fail explicitly before producing nonfinite output',()=>{const x=cloneDemo();x.overrides=Array(600).fill(10);x.dcaYears=50;assert.throws(()=>simulate(x),/數值範圍/);assert.throws(()=>dca(x),/數值範圍/);});
+test('reference auxiliary sensitivity sign is dormant under affordable-contribution constraints',()=>{
+ for(const timing of ['begin','end'])for(const flow of [-10000,-1,0,1,100,10000])for(const target of [0,1,100,100000])for(const surplus of [0,.5,1])for(const start of [0,1,10000])for(const rate of [-1,-.5,0,.1]){
+  const con=Math.min(target,Math.max(0,flow))+Math.max(0,flow-target)*surplus;
+  const cashUsed=Math.min(500,Math.max(0,-flow)),grownBeforeEnd=(start+(timing==='begin'?con:0))*(1+rate),end=timing==='end'?con:0;
+  const reference=Math.max(0,-flow-cashUsed-grownBeforeEnd+end);
+  const base=Math.max(0,-flow-cashUsed-grownBeforeEnd-end);
+  assert.equal(reference,base);
+ }
+});
+test('reference auxiliary sensitivities match independent base projections across funding and retirement stress',()=>{
+ for(const patch of [{},{salary:1000,cash:50,investments:10000,retirementYears:1},{timing:'begin',retirementYears:0},{target:100000,surplusShare:1},{ownershipShare:.3,paymentShare:.7},{gift:0,cash:0,investments:0}]){
+  const x={...cloneDemo(),...patch},base=simulate(x);
+  for(const [index,rate] of [[59,0],[65,.05],[71,.1]]){
+   const s=simulate({...x,annualReturn:rate,overrides:Array(600).fill(null)});
+   for(let i=0;i<600;i++)for(const [ref,actual] of [[index,25],[index+1,27],[index+2,28],[index+3,33],[index+4,35],[index+5,39]]){
+    const a=base.monthly[i][ref],b=s.monthly[i][actual];if(b===null)assert.equal(a,null);else near(a,b,1e-10);
+   }
+  }
+ }
+});

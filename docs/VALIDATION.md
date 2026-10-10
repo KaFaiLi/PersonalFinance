@@ -2,7 +2,7 @@
 
 ## Passed
 
-- **30 Node tests**, covering determinism, 600 months, effective-rate conversion, zero/negative returns, zero-interest mortgages, 480-month payoff, contribution caps/timing, retirement, cash depletion, persistent gaps, buy-only gifts, separate shares, financed insurance, 3% target growth, zero-versus-blank overrides, surplus allocation, full-target DCA, progressive/standard tax, pension/rental/interest deductions, claim-year selection, schema/import/export, conservation and nonfinite-output rejection.
+- **32 Node tests**, covering determinism, 600 months, effective-rate conversion, zero/negative returns, zero-interest mortgages, 480-month payoff, contribution caps/timing, retirement, cash depletion, persistent gaps, buy-only gifts, separate shares, financed insurance, 3% target growth, zero-versus-blank overrides, surplus allocation, full-target DCA, progressive/standard tax, pension/rental/interest deductions, claim-year selection, schema/import/export, conservation, nonfinite-output rejection and sensitivity sign equivalence.
 - **Input mapping:** 75 normalized parameters recomputed from the private input cells matched the frozen dependency values, with no mismatches; the complete semantic input fixture passed schema validation.
 - **Frozen-reference parity:** all 600 monthly rows × 76 columns and 50 annual rows × 29 columns traversed, including blank handling. **46,990 nonblank cells compared; 0 failures** under the policies below. Maximum non-audit relative numerical difference: **1.1896482448628392e-13**. No private amounts are emitted by the parity harness.
 - **29 real Chromium browser checks** using Python Playwright: desktop main geometry; desktop and all five mobile routes without document overflow; keyboard skip link; form submit; explicit local save/load/delete; no automatic persistence/loading; JSON export/import, invalid import preservation and repeated same-file import; invalid rate rejection; zero override preservation; 600-row CSV; independent DCA; historical fixed/rolling/dividend views; non-five-year horizon; unconfirmed gift labeling and wealth withholding; repeated navigation; zero uncaught runtime errors; only same-origin static requests, no external APIs/analytics.
@@ -15,7 +15,7 @@ The engine uses IEEE-754 double precision without intermediate currency rounding
 
 Audit residual columns AY/AZ subtract extremely large nearly equal balances under the private reference's extreme return assumption. Their tolerance additionally permits `32 × Number.EPSILON × largest relevant portfolio/equity balance`. Maximum residual difference was **0.078125 HKD**, caused by floating-point cancellation at those extreme scales; ordinary-scale conservation tests require residuals below 0.000001 HKD. This special audit tolerance is not used for tax, cash flow, asset or wealth outputs. The extreme private assumption is never used as a public default.
 
-The explicitly documented BF220 chart-helper zero/null presentation difference is exempted; no other mismatch is silently skipped. See MODEL.md for the reference sensitivity formula issue and separation from recomputed dashboard scenarios.
+The explicitly documented BF220 chart-helper zero/null presentation difference is exempted; no other mismatch is silently skipped. See MODEL.md for the reference sensitivity expression analysis and separation from recomputed dashboard scenarios.
 
 ## Limits / unavailable checks
 

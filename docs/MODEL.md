@@ -46,9 +46,17 @@ All monetary amounts are nominal HKD; full-house and personal scopes are explici
 6. Personal property value and debt use ownership share; actual mortgage cash uses payment share; holding cash uses expense share. Partner acquisition budgets never become personal income/assets. Principal builds equity; interest and costs reduce wealth. The engine retains ownership/payment transfer audit columns.
 7. Retirement begins after the specified whole working years. Pension and other payroll stop; retirement income and targets replace employment values. Pension-account assets and employer contributions are intentionally excluded because the reference does not supply them.
 
-## Reference compatibility versus corrected sensitivity
+## Reference compatibility and independently recomputed sensitivity
 
-The reference's auxiliary sensitivity gap formulas (BH/BK/BN/BQ/BT/BW) add the month-end contribution term when testing a shortfall. That can create a spurious sensitivity gap in some scenarios. The **parity kernel preserves those columns only for reference audit**. Dashboard sensitivity calls `simulate()` afresh for each annual return, with overrides disabled, so it uses the correct base cash-flow deficit mechanics. Export headers prefix auxiliary fields with `reference`; these are not the dashboard sensitivity series. No live Sheet formula was changed.
+The reference's auxiliary sensitivity gap formulas (BH/BK/BN/BQ/BT/BW) have a structural sign difference: they add the month-end contribution when testing a shortfall. For example, BH220's new-gap expression reduces to:
+
+```text
+MAX(0, -S220 - V220 - grownOpeningAssets + monthEndContribution)
+```
+
+Here S is available cash flow, V is cash used, and U supplies the month-end contribution. The base ledger effectively subtracts `monthEndContribution` in that position. **This difference has no numerical effect for valid inputs under the existing contribution cap.** When cash flow is nonnegative, contribution is at most cash flow and both shortfall expressions are zero. When cash flow is negative, contribution is zero and the expressions are identical. Opening investments and growth factors are nonnegative under the schema constraints. No main-projection formula uses the auxiliary gap columns, so the main Sheet projection is also unaffected.
+
+The parity kernel retains the reference columns for audit. Dashboard sensitivity calls `simulate()` afresh for each annual return, with overrides disabled. Export headers prefix auxiliary fields with `reference`; these are not a claimed numerical correction. Tests verify both the sign equivalence at boundary cases and agreement of all six auxiliary asset/gap/wealth outputs with independent projections across 600 months, both contribution timings, retirement/deficit stress, ownership differences and funding failure. **No Sheet edit is needed for this sign difference, and none was made.**
 
 The first reference chart-helper cell BF220 can contain zero for an unavailable result; the browser uses a missing value to avoid drawing a fictional zero-wealth point. The parity harness explicitly tolerates only that documented presentation difference.
 

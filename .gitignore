@@ -1,0 +1,7 @@
+dist/
+node_modules/
+.private/
+*.xlsx
+*.zip
+.env*
+playwright-report/

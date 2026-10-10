@@ -1,0 +1,9 @@
+{
+  "monthlyRows": 600,
+  "annualRows": 50,
+  "compared": 46990,
+  "failed": 0,
+  "maxNonAuditRelative": 1.1896482448628392e-13,
+  "maxAuditAbsolute": 0.078125,
+  "firstMismatchCoordinates": []
+}

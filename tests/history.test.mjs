@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {historical} from '../src/history.ts';
+const {rows}=JSON.parse(fs.readFileSync(new URL('../src/history-data.json',import.meta.url)));
+test('241 monthly levels, 181 rolling 60-month windows and fixed boundaries',()=>{const h=historical(rows);assert.equal(h.normalized.length,241);assert.equal(h.rolling.length,181);assert.equal(h.fixed.length,4);assert.equal(h.fixed[0].start,'2006-08');assert.equal(h.fixed[3].end,'2026-08');assert.equal(h.rolling[0].start,'2006-08');assert.equal(h.rolling[0].end,'2011-08');});
+test('five-year contributions sum to one; returns compound to full period',()=>{const h=historical(rows);for(const key of ['spy','housing','adjusted']){assert.ok(Math.abs(h.fixed.reduce((a,r)=>a+r[key].contribution,0)-1)<1e-12);assert.ok(Math.abs(h.fixed.reduce((a,r)=>a*(1+r[key].return),1)-rows.at(-1)[key]/rows[0][key])<1e-12);}});
+test('provisional flags and distinct dividend adjusted series preserved',()=>{assert.ok(rows.slice(-3).every(r=>r.flag.includes('P')));assert.notEqual(rows[0].spy,rows[0].adjusted);assert.throws(()=>historical(rows.slice(1)));});
